@@ -69,7 +69,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           dispatch({ type: 'AUTH_FAILURE', payload: 'Sesión expirada' });
         }
       } else {
-        dispatch({ type: 'AUTH_LOGOUT' });
+        // Simular usuario admin para desarrollo
+        const mockUser = {
+          id: '1',
+          email: 'admin@test.com',
+          name: 'Administrador',
+          role: 'admin' as const,
+          organizationId: 'org-1',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+        dispatch({ type: 'AUTH_SUCCESS', payload: { user: mockUser } });
       }
     };
 
@@ -79,9 +89,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (credentials: LoginCredentials) => {
     try {
       dispatch({ type: 'AUTH_START' });
-      const { user, token } = await authService.login(credentials);
-      localStorage.setItem('token', token);
-      dispatch({ type: 'AUTH_SUCCESS', payload: { user } });
+      
+      // Simular login exitoso para desarrollo
+      const mockUser = {
+        id: '1',
+        email: credentials.email,
+        name: 'Administrador',
+        role: 'admin' as const,
+        organizationId: 'org-1',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      
+      const mockToken = 'mock-token-123';
+      localStorage.setItem('token', mockToken);
+      dispatch({ type: 'AUTH_SUCCESS', payload: { user: mockUser } });
     } catch (error) {
       dispatch({ type: 'AUTH_FAILURE', payload: (error as Error).message });
     }
@@ -90,9 +112,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (data: RegisterData) => {
     try {
       dispatch({ type: 'AUTH_START' });
-      const { user, token } = await authService.register(data);
-      localStorage.setItem('token', token);
-      dispatch({ type: 'AUTH_SUCCESS', payload: { user } });
+      
+      // Simular registro exitoso para desarrollo
+      const mockUser = {
+        id: '1',
+        email: data.email,
+        name: data.name,
+        role: data.role,
+        organizationId: data.organizationId || 'org-1',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      
+      const mockToken = 'mock-token-123';
+      localStorage.setItem('token', mockToken);
+      dispatch({ type: 'AUTH_SUCCESS', payload: { user: mockUser } });
     } catch (error) {
       dispatch({ type: 'AUTH_FAILURE', payload: (error as Error).message });
     }
@@ -105,7 +139,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const resetPassword = async (email: string) => {
     try {
-      await authService.resetPassword(email);
+      // Simular reset de contraseña
+      console.log('Reset password for:', email);
     } catch (error) {
       dispatch({ type: 'AUTH_FAILURE', payload: (error as Error).message });
     }

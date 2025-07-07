@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import type { LoginCredentials } from '../../types/auth';
 
 const LoginForm: React.FC = () => {
-  const { login, isLoading, error, clearError } = useAuth();
+  const { login, isLoading, error, clearError, user } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<LoginCredentials>({
     email: '',
     password: '',
@@ -40,6 +41,12 @@ const LoginForm: React.FC = () => {
 
     try {
       await login(formData);
+      // Redirigir según el rol del usuario
+      if (user?.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard'); // Para docentes (cuando implementemos)
+      }
     } catch (error) {
       // Error ya manejado por el contexto
     }
