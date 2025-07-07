@@ -1,16 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import type { LoginCredentials } from '../../types/auth';
 
 const LoginForm: React.FC = () => {
-  const { login, isLoading, error, clearError, user } = useAuth();
+  const { login, isLoading, error, clearError, user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState<LoginCredentials>({
     email: '',
     password: '',
   });
   const [validationErrors, setValidationErrors] = useState<Partial<LoginCredentials>>({});
+
+  // Redirigir después del login exitoso
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.role === 'admin') {
+        navigate('/admin');
+      } else if (user.role === 'teacher') {
+        navigate('/teacher');
+      }
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const validateForm = (): boolean => {
     const errors: Partial<LoginCredentials> = {};
@@ -41,12 +52,8 @@ const LoginForm: React.FC = () => {
 
     try {
       await login(formData);
-      // Redirigir según el rol del usuario
-      if (user?.role === 'admin') {
-        navigate('/admin');
-      } else {
-        navigate('/dashboard'); // Para docentes (cuando implementemos)
-      }
+      // La redirección se manejará en el useEffect del AuthContext
+      // o podemos redirigir aquí basado en el rol
     } catch (error) {
       // Error ya manejado por el contexto
     }

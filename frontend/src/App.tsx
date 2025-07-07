@@ -6,6 +6,7 @@ import RegisterPage from './pages/RegisterPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import TestPage from './pages/TestPage';
 import AdminDashboard from './pages/AdminDashboard';
+import TeacherDashboard from './pages/TeacherDashboard';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
 const App: React.FC = () => {
@@ -25,6 +26,15 @@ const App: React.FC = () => {
               element={
                 <ProtectedRoute requiredRole="admin">
                   <AdminDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/teacher" 
+              element={
+                <ProtectedRoute requiredRole="teacher">
+                  <TeacherDashboard />
                 </ProtectedRoute>
               } 
             />

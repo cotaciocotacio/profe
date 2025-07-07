@@ -69,17 +69,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           dispatch({ type: 'AUTH_FAILURE', payload: 'Sesión expirada' });
         }
       } else {
-        // Simular usuario admin para desarrollo
-        const mockUser = {
-          id: '1',
-          email: 'admin@test.com',
-          name: 'Administrador',
-          role: 'admin' as const,
-          organizationId: 'org-1',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-        dispatch({ type: 'AUTH_SUCCESS', payload: { user: mockUser } });
+        // No simular usuario automáticamente - permitir flujo normal de login
+        dispatch({ type: 'AUTH_LOGOUT' });
       }
     };
 
@@ -90,20 +81,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       dispatch({ type: 'AUTH_START' });
       
-      // Simular login exitoso para desarrollo
-      const mockUser = {
-        id: '1',
-        email: credentials.email,
-        name: 'Administrador',
-        role: 'admin' as const,
-        organizationId: 'org-1',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      
-      const mockToken = 'mock-token-123';
-      localStorage.setItem('token', mockToken);
-      dispatch({ type: 'AUTH_SUCCESS', payload: { user: mockUser } });
+      const { user, token } = await authService.login(credentials);
+      localStorage.setItem('token', token);
+      dispatch({ type: 'AUTH_SUCCESS', payload: { user } });
     } catch (error) {
       dispatch({ type: 'AUTH_FAILURE', payload: (error as Error).message });
     }
@@ -113,20 +93,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       dispatch({ type: 'AUTH_START' });
       
-      // Simular registro exitoso para desarrollo
-      const mockUser = {
-        id: '1',
-        email: data.email,
-        name: data.name,
-        role: data.role,
-        organizationId: data.organizationId || 'org-1',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      
-      const mockToken = 'mock-token-123';
-      localStorage.setItem('token', mockToken);
-      dispatch({ type: 'AUTH_SUCCESS', payload: { user: mockUser } });
+      const { user, token } = await authService.register(data);
+      localStorage.setItem('token', token);
+      dispatch({ type: 'AUTH_SUCCESS', payload: { user } });
     } catch (error) {
       dispatch({ type: 'AUTH_FAILURE', payload: (error as Error).message });
     }
