@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { plansService } from '../../services/plansService';
 import type { PlanGenerationFormData, PlanGenerationStep, Subject, Course } from '../../types/plans';
-import LoadingSpinner from '../common/LoadingSpinner';
+import { LoadingSpinner, FileUpload } from '../common';
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 interface PlanGenerationWizardProps {
   onComplete: (jobId: string) => void;
@@ -86,18 +88,10 @@ const PlanGenerationWizard: React.FC<PlanGenerationWizardProps> = ({ onComplete,
     });
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
+  const handleFileUpload = (files: File[]) => {
     setFormData(prev => ({
       ...prev,
-      files: [...prev.files, ...files],
-    }));
-  };
-
-  const handleFileRemove = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      files: prev.files.filter((_, i) => i !== index),
+      files: files,
     }));
   };
 
@@ -126,12 +120,27 @@ const PlanGenerationWizard: React.FC<PlanGenerationWizardProps> = ({ onComplete,
     }
   };
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.6,
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: 'easeOut' as const,
+      },
+    },
   };
 
   const renderStepContent = () => {
@@ -188,50 +197,16 @@ const PlanGenerationWizard: React.FC<PlanGenerationWizardProps> = ({ onComplete,
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Archivos de Resultados *
               </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                <input
-                  type="file"
-                  multiple
-                  accept=".pdf,.doc,.docx,.xls,.xlsx"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                  id="file-upload"
-                />
-                <label
-                  htmlFor="file-upload"
-                  className="cursor-pointer inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-                >
-                  📁 Seleccionar Archivos
-                </label>
-                <p className="mt-2 text-sm text-gray-500">
-                  PDF, Word, Excel (máx. 10MB por archivo)
-                </p>
-              </div>
+              <FileUpload
+                onFilesSelected={handleFileUpload}
+                multiple={true}
+                accept=".pdf,.doc,.docx,.xls,.xlsx"
+                maxSize={10 * 1024 * 1024} // 10MB
+                maxFiles={10}
+                placeholder="Arrastra archivos aquí o haz clic para seleccionar"
+                showPreview={true}
+              />
             </div>
-
-            {formData.files.length > 0 && (
-              <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-3">Archivos seleccionados:</h4>
-                <div className="space-y-2">
-                  {formData.files.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
-                      <div className="flex items-center">
-                        <span className="text-sm text-gray-900">{file.name}</span>
-                        <span className="ml-2 text-xs text-gray-500">
-                          ({formatFileSize(file.size)})
-                        </span>
-                      </div>
-                      <button
-                        onClick={() => handleFileRemove(index)}
-                        className="text-red-600 hover:text-red-900 text-sm"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         );
 
@@ -257,7 +232,10 @@ const PlanGenerationWizard: React.FC<PlanGenerationWizardProps> = ({ onComplete,
             </div>
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h4 className="text-sm font-medium text-blue-800 mb-2">⚠️ Información importante:</h4>
+              <h4 className="text-sm font-medium text-blue-800 mb-2 flex items-center">
+                <ExclamationTriangleIcon className="h-4 w-4 mr-2" />
+                Información importante:
+              </h4>
               <ul className="text-sm text-blue-700 space-y-1">
                 <li>• El proceso puede tomar varios minutos</li>
                 <li>• Los archivos se procesarán de forma segura</li>
@@ -274,26 +252,41 @@ const PlanGenerationWizard: React.FC<PlanGenerationWizardProps> = ({ onComplete,
 
   if (isLoading && currentStep === 1) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <LoadingSpinner size="lg" />
-      </div>
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="bg-white shadow rounded-lg p-6"
+      >
+        <motion.div variants={itemVariants} className="flex justify-center items-center h-64">
+          <div className="text-center">
+            <LoadingSpinner size="lg" />
+            <p className="mt-4 text-gray-600">Cargando datos iniciales...</p>
+          </div>
+        </motion.div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="bg-white shadow rounded-lg p-6">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="bg-white shadow rounded-lg p-6"
+    >
       {/* Header */}
-      <div className="mb-6">
+      <motion.div variants={itemVariants} className="mb-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
           Crear Plan de Reforzamiento
         </h2>
         <p className="text-gray-600">
           Genera un plan personalizado basado en los resultados de exámenes
         </p>
-      </div>
+      </motion.div>
 
       {/* Progress Steps */}
-      <div className="mb-8">
+      <motion.div variants={itemVariants} className="mb-8">
         <div className="flex items-center justify-between">
           {steps.map((step, index) => (
             <div key={step.id} className="flex items-center">
@@ -318,28 +311,36 @@ const PlanGenerationWizard: React.FC<PlanGenerationWizardProps> = ({ onComplete,
             </div>
           ))}
         </div>
-      </div>
+      </motion.div>
 
       {/* Error/Success Messages */}
       {error && (
-        <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md"
+        >
           {error}
-        </div>
+        </motion.div>
       )}
 
       {success && (
-        <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md"
+        >
           {success}
-        </div>
+        </motion.div>
       )}
 
       {/* Step Content */}
-      <div className="mb-6">
+      <motion.div variants={itemVariants} className="mb-6">
         {renderStepContent()}
-      </div>
+      </motion.div>
 
       {/* Navigation */}
-      <div className="flex justify-between">
+      <motion.div variants={itemVariants} className="flex justify-between">
         <button
           onClick={currentStep === 1 ? onCancel : handlePrevious}
           className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
@@ -375,8 +376,8 @@ const PlanGenerationWizard: React.FC<PlanGenerationWizardProps> = ({ onComplete,
             </button>
           )}
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

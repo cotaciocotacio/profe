@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import type { Organization, OrganizationFormData } from '../../types/organization';
 import { organizationService } from '../../services/organizationService';
 import LoadingSpinner from '../common/LoadingSpinner';
@@ -8,64 +9,100 @@ interface OrganizationFormProps {
 }
 
 const OrganizationForm: React.FC<OrganizationFormProps> = ({ onSuccess }) => {
-  const [formData, setFormData] = useState<OrganizationFormData>({
-    name: 'Colegio San José',
-    address: 'Calle Principal 123, Ciudad',
-    phone: '+1 234 567 8900',
-    email: 'contacto@colegiosanjose.edu',
-    website: 'https://www.colegiosanjose.edu',
-  });
+  const [organization, setOrganization] = useState<Organization | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingData, setIsLoadingData] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [formData, setFormData] = useState<OrganizationFormData>({
+    name: '',
+    email: '',
+    phone: '',
+    website: '',
+    address: '',
+  });
 
   useEffect(() => {
-    // loadOrganization(); // Comentado para desarrollo
+    loadOrganization();
   }, []);
 
   const loadOrganization = async () => {
     try {
-      setIsLoadingData(true);
-      const organization = await organizationService.getOrganization();
+      setIsLoading(true);
+      const data = await organizationService.getOrganization();
+      setOrganization(data);
       setFormData({
-        name: organization.name,
-        address: organization.address,
-        phone: organization.phone,
-        email: organization.email,
-        website: organization.website || '',
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        website: data.website || '',
+        address: data.address || '',
       });
     } catch (error) {
-      setError('Error al cargar los datos de la organización');
-    } finally {
-      setIsLoadingData(false);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-    setSuccess(null);
-
-    try {
-      // Simular actualización exitosa para desarrollo
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setSuccess('Organización actualizada correctamente');
-      onSuccess?.();
-    } catch (error) {
-      setError((error as Error).message);
+      setError('Error al cargar la información de la organización');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  if (isLoadingData) {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      // Simular operación exitosa para desarrollo
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const updatedOrganization = {
+        ...organization!,
+        ...formData,
+        updatedAt: new Date(),
+      };
+      
+      setOrganization(updatedOrganization);
+      setSuccess('Información de la organización actualizada correctamente');
+      
+      if (onSuccess) {
+        onSuccess();
+      }
+    } catch (error) {
+      setError((error as Error).message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.6,
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: 'easeOut' as const,
+      },
+    },
+  };
+
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <LoadingSpinner size="lg" />
@@ -74,30 +111,43 @@ const OrganizationForm: React.FC<OrganizationFormProps> = ({ onSuccess }) => {
   }
 
   return (
-    <div className="bg-white shadow rounded-lg p-6">
-      <div className="mb-6">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="bg-white shadow rounded-lg p-6"
+    >
+      <motion.div variants={itemVariants} className="mb-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
           Configuración de la Organización
         </h2>
         <p className="text-gray-600">
           Actualiza la información básica de tu institución educativa.
         </p>
-      </div>
+      </motion.div>
 
       {error && (
-        <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md"
+        >
           {error}
-        </div>
+        </motion.div>
       )}
 
       {success && (
-        <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md"
+        >
           {success}
-        </div>
+        </motion.div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <motion.form variants={itemVariants} onSubmit={handleSubmit} className="space-y-6">
+        <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
               Nombre de la Institución *
@@ -160,9 +210,9 @@ const OrganizationForm: React.FC<OrganizationFormProps> = ({ onSuccess }) => {
               placeholder="https://www.institucion.edu"
             />
           </div>
-        </div>
+        </motion.div>
 
-        <div>
+        <motion.div variants={itemVariants}>
           <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
             Dirección *
           </label>
@@ -171,20 +221,20 @@ const OrganizationForm: React.FC<OrganizationFormProps> = ({ onSuccess }) => {
             name="address"
             required
             value={formData.address}
-            onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+            onChange={handleInputChange}
             rows={3}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             placeholder="Dirección completa de la institución"
           />
-        </div>
+        </motion.div>
 
-        <div className="flex justify-end">
+        <motion.div variants={itemVariants} className="flex justify-end">
           <button
             type="submit"
-            disabled={isLoading}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isSubmitting}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
           >
-            {isLoading ? (
+            {isSubmitting ? (
               <>
                 <LoadingSpinner size="sm" color="white" className="mr-2" />
                 Guardando...
@@ -193,9 +243,9 @@ const OrganizationForm: React.FC<OrganizationFormProps> = ({ onSuccess }) => {
               'Guardar Cambios'
             )}
           </button>
-        </div>
-      </form>
-    </div>
+        </motion.div>
+      </motion.form>
+    </motion.div>
   );
 };
 

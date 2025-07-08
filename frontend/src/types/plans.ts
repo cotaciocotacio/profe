@@ -63,4 +63,38 @@ export interface Course {
   id: string;
   name: string;
   grade: string;
+}
+
+export interface StudentResult {
+  id: string;
+  studentId: string;
+  studentName: string;
+  planId: string;
+  status: 'completed' | 'in_progress' | 'not_started';
+  score?: number;
+  completedAt?: Date;
+  planContent: string; // Markdown content
+  recommendations: string[];
+  exercises: Exercise[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface PlanResults {
+  planId: string;
+  planName: string;
+  subjectName: string;
+  courseName: string;
+  totalStudents: number;
+  completedStudents: number;
+  averageScore?: number;
+  students: StudentResult[];
+  createdAt: Date;
+}
+
+export interface PlanModalData {
+  studentName: string;
+  planContent: string;
+  recommendations: string[];
+  exercises: Exercise[];
 } 

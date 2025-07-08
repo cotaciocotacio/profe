@@ -1,38 +1,19 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
+import DashboardLayout from '../components/layouts/DashboardLayout';
 import OrganizationForm from '../components/admin/OrganizationForm';
 import SubjectsManager from '../components/admin/SubjectsManager';
 import CoursesManager from '../components/admin/CoursesManager';
 import TeachersManager from '../components/admin/TeachersManager';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import { BuildingOfficeIcon, BookOpenIcon, UserGroupIcon, AcademicCapIcon } from '@heroicons/react/24/outline';
 
 type AdminSection = 'organization' | 'subjects' | 'courses' | 'teachers';
 
 const AdminDashboard: React.FC = () => {
   const { user, logout } = useAuth();
   const [activeSection, setActiveSection] = useState<AdminSection>('organization');
-
-  const sections = [
-    { id: 'organization' as const, name: 'Organización', icon: '🏢' },
-    { id: 'subjects' as const, name: 'Materias', icon: '📚' },
-    { id: 'courses' as const, name: 'Cursos', icon: '👥' },
-    { id: 'teachers' as const, name: 'Docentes', icon: '👨‍🏫' },
-  ];
-
-  const renderSection = () => {
-    switch (activeSection) {
-      case 'organization':
-        return <OrganizationForm />;
-      case 'subjects':
-        return <SubjectsManager />;
-      case 'courses':
-        return <CoursesManager />;
-      case 'teachers':
-        return <TeachersManager />;
-      default:
-        return null;
-    }
-  };
 
   if (!user) {
     return (
@@ -42,62 +23,119 @@ const AdminDashboard: React.FC = () => {
     );
   }
 
+  const sidebarItems = [
+    { 
+      id: 'organization', 
+      name: 'Organización', 
+      icon: <BuildingOfficeIcon className="h-5 w-5 text-indigo-600" />,
+      onClick: () => setActiveSection('organization'),
+      isActive: activeSection === 'organization'
+    },
+    { 
+      id: 'subjects', 
+      name: 'Materias', 
+      icon: <BookOpenIcon className="h-5 w-5 text-indigo-600" />,
+      onClick: () => setActiveSection('subjects'),
+      isActive: activeSection === 'subjects'
+    },
+    { 
+      id: 'courses', 
+      name: 'Cursos', 
+      icon: <UserGroupIcon className="h-5 w-5 text-indigo-600" />,
+      onClick: () => setActiveSection('courses'),
+      isActive: activeSection === 'courses'
+    },
+    { 
+      id: 'teachers', 
+      name: 'Docentes', 
+      icon: <AcademicCapIcon className="h-5 w-5 text-indigo-600" />,
+      onClick: () => setActiveSection('teachers'),
+      isActive: activeSection === 'teachers'
+    },
+  ];
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.6,
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: 'easeOut' as const,
+      },
+    },
+  };
+
+  const renderSection = () => {
+    switch (activeSection) {
+      case 'organization':
+        return (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <OrganizationForm />
+          </motion.div>
+        );
+
+      case 'subjects':
+        return (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <SubjectsManager />
+          </motion.div>
+        );
+
+      case 'courses':
+        return (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <CoursesManager />
+          </motion.div>
+        );
+
+      case 'teachers':
+        return (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <TeachersManager />
+          </motion.div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                Panel de Administración
-              </h1>
-              <p className="text-gray-600">
-                Bienvenido, {user.name}
-              </p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-500">
-                {user.email}
-              </span>
-              <button
-                onClick={logout}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
-              >
-                Cerrar Sesión
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Navigation */}
-        <nav className="mb-8">
-          <div className="flex space-x-1 bg-white rounded-lg shadow p-1">
-            {sections.map((section) => (
-              <button
-                key={section.id}
-                onClick={() => setActiveSection(section.id)}
-                className={`flex-1 flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                  activeSection === section.id
-                    ? 'bg-indigo-600 text-white'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                <span className="mr-2">{section.icon}</span>
-                {section.name}
-              </button>
-            ))}
-          </div>
-        </nav>
-
-        {/* Content */}
-        <main>
-          {renderSection()}
-        </main>
-      </div>
-    </div>
+    <DashboardLayout 
+      sidebarItems={sidebarItems} 
+      title="Panel de Administración"
+      subtitle={`Bienvenido, ${user?.name}`}
+    >
+      {renderSection()}
+    </DashboardLayout>
   );
 };
 

@@ -1,187 +1,223 @@
 import React, { useState, useEffect } from 'react';
-import type { Course, CourseFormData } from '../../types/organization';
-import { organizationService } from '../../services/organizationService';
-import LoadingSpinner from '../common/LoadingSpinner';
+import { motion } from 'framer-motion';
+import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+
+interface Course {
+  id: string;
+  name: string;
+  grade: string;
+  createdAt: string;
+}
 
 const CoursesManager: React.FC = () => {
-  const [courses, setCourses] = useState<Course[]>([
-    {
-      id: '1',
-      name: 'Primer Grado',
-      organizationId: 'org-1',
-      createdAt: new Date('2024-01-01'),
-      updatedAt: new Date('2024-01-01'),
-    },
-    {
-      id: '2',
-      name: 'Segundo Grado',
-      organizationId: 'org-1',
-      createdAt: new Date('2024-01-01'),
-      updatedAt: new Date('2024-01-01'),
-    },
-    {
-      id: '3',
-      name: 'Tercer Grado',
-      organizationId: 'org-1',
-      createdAt: new Date('2024-01-01'),
-      updatedAt: new Date('2024-01-01'),
-    },
-    {
-      id: '4',
-      name: 'Cuarto Grado',
-      organizationId: 'org-1',
-      createdAt: new Date('2024-01-01'),
-      updatedAt: new Date('2024-01-01'),
-    },
-  ]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
-  const [formData, setFormData] = useState<CourseFormData>({ name: '' });
+  const [formData, setFormData] = useState({
+    name: '',
+    grade: '',
+  });
 
-  useEffect(() => {
-    // loadCourses(); // Comentado para desarrollo
-  }, []);
-
-  const loadCourses = async () => {
-    try {
-      setIsLoading(true);
-      const data = await organizationService.getCourses();
-      setCourses(data);
-    } catch (error) {
-      setError('Error al cargar los cursos');
-    } finally {
-      setIsLoading(false);
-    }
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.6,
+        staggerChildren: 0.1,
+      },
+    },
   };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: 'easeOut' as const,
+      },
+    },
+  };
+
+  const tableRowVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: (custom: number) => ({
+      opacity: 1,
+      x: 0,
+      transition: {
+        delay: custom * 0.1,
+        duration: 0.5,
+        ease: 'easeOut' as const,
+      },
+    }),
+  };
+
+  // Simular carga de datos
+  useEffect(() => {
+    const loadCourses = async () => {
+      try {
+        // Simular llamada a API
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        setCourses([
+          { id: '1', name: 'Matemáticas 1°', grade: '1°', createdAt: '2024-01-15' },
+          { id: '2', name: 'Matemáticas 2°', grade: '2°', createdAt: '2024-01-16' },
+          { id: '3', name: 'Matemáticas 3°', grade: '3°', createdAt: '2024-01-17' },
+        ]);
+      } catch (error) {
+        console.error('Error loading courses:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadCourses();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
-    setSuccess(null);
+    
+    if (!formData.name.trim() || !formData.grade.trim()) {
+      return;
+    }
 
     try {
-      // Simular operación exitosa para desarrollo
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
       if (editingCourse) {
-        setCourses(prev => prev.map(course => 
-          course.id === editingCourse.id 
-            ? { ...course, name: formData.name, updatedAt: new Date() }
+        // Actualizar curso existente
+        const updatedCourses = courses.map(course =>
+          course.id === editingCourse.id
+            ? { ...course, name: formData.name, grade: formData.grade }
             : course
-        ));
-        setSuccess('Curso actualizado correctamente');
+        );
+        setCourses(updatedCourses);
       } else {
+        // Crear nuevo curso
         const newCourse: Course = {
           id: Date.now().toString(),
           name: formData.name,
-          organizationId: 'org-1',
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          grade: formData.grade,
+          createdAt: new Date().toISOString().split('T')[0],
         };
-        setCourses(prev => [...prev, newCourse]);
-        setSuccess('Curso creado correctamente');
+        setCourses([...courses, newCourse]);
       }
-      
-      setShowForm(false);
+
+      // Limpiar formulario
+      setFormData({ name: '', grade: '' });
       setEditingCourse(null);
-      setFormData({ name: '' });
+      setShowForm(false);
     } catch (error) {
-      setError((error as Error).message);
-    } finally {
-      setIsSubmitting(false);
+      console.error('Error saving course:', error);
     }
   };
 
   const handleEdit = (course: Course) => {
     setEditingCourse(course);
-    setFormData({ name: course.name });
+    setFormData({ name: course.name, grade: course.grade });
     setShowForm(true);
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Estás seguro de que quieres eliminar este curso?')) {
-      return;
-    }
-
-    try {
-      // Simular eliminación exitosa para desarrollo
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setCourses(prev => prev.filter(course => course.id !== id));
-      setSuccess('Curso eliminado correctamente');
-    } catch (error) {
-      setError((error as Error).message);
+    if (window.confirm('¿Estás seguro de que quieres eliminar este curso?')) {
+      try {
+        setCourses(courses.filter(course => course.id !== id));
+      } catch (error) {
+        console.error('Error deleting course:', error);
+      }
     }
   };
 
   const handleCancel = () => {
-    setShowForm(false);
+    setFormData({ name: '', grade: '' });
     setEditingCourse(null);
-    setFormData({ name: '' });
+    setShowForm(false);
   };
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <LoadingSpinner size="lg" />
-      </div>
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="bg-white shadow rounded-lg p-6"
+      >
+        <motion.div variants={itemVariants} className="flex justify-center items-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Cargando cursos...</p>
+          </div>
+        </motion.div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="bg-white shadow rounded-lg p-6">
-      <div className="flex justify-between items-center mb-6">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="bg-white shadow rounded-lg p-6"
+    >
+      {/* Header */}
+      <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Gestión de Cursos
-          </h2>
-          <p className="text-gray-600">
-            Administra los cursos disponibles en tu institución.
-          </p>
+          <h2 className="text-2xl font-bold text-gray-900">Gestión de Cursos</h2>
+          <p className="text-gray-600">Administra los cursos de la institución</p>
         </div>
         <button
           onClick={() => setShowForm(true)}
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
         >
-          Agregar Curso
+          <PlusIcon className="h-5 w-5 mr-2" />
+          Nuevo Curso
         </button>
-      </div>
+      </motion.div>
 
-      {error && (
-        <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">
-          {success}
-        </div>
-      )}
-
+      {/* Form */}
       {showForm && (
-        <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          className="mb-6 bg-gray-50 rounded-lg p-4"
+        >
           <h3 className="text-lg font-medium text-gray-900 mb-4">
             {editingCourse ? 'Editar Curso' : 'Nuevo Curso'}
           </h3>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="courseName" className="block text-sm font-medium text-gray-700 mb-2">
-                Nombre del Curso *
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                Nombre del Curso
               </label>
               <input
                 type="text"
-                id="courseName"
-                required
+                id="name"
                 value={formData.name}
-                onChange={(e) => setFormData({ name: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Ej: Primer Grado"
+                required
               />
+            </div>
+            <div>
+              <label htmlFor="grade" className="block text-sm font-medium text-gray-700 mb-1">
+                Grado
+              </label>
+              <select
+                id="grade"
+                value={formData.grade}
+                onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                required
+              >
+                <option value="">Selecciona un grado</option>
+                <option value="1°">1°</option>
+                <option value="2°">2°</option>
+                <option value="3°">3°</option>
+                <option value="4°">4°</option>
+                <option value="5°">5°</option>
+                <option value="6°">6°</option>
+              </select>
             </div>
             <div className="flex justify-end space-x-3">
               <button
@@ -193,29 +229,25 @@ const CoursesManager: React.FC = () => {
               </button>
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
+                className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
               >
-                {isSubmitting ? (
-                  <>
-                    <LoadingSpinner size="sm" color="white" className="mr-2" />
-                    Guardando...
-                  </>
-                ) : (
-                  editingCourse ? 'Actualizar' : 'Crear'
-                )}
+                {editingCourse ? 'Actualizar' : 'Crear'}
               </button>
             </div>
           </form>
-        </div>
+        </motion.div>
       )}
 
-      <div className="overflow-x-auto">
+      {/* Table */}
+      <motion.div variants={itemVariants} className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Nombre
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Grado
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Fecha de Creación
@@ -226,10 +258,19 @@ const CoursesManager: React.FC = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {courses.map((course) => (
-              <tr key={course.id}>
+            {courses.map((course, index) => (
+              <motion.tr
+                key={course.id}
+                custom={index}
+                variants={tableRowVariants}
+                initial="hidden"
+                animate="visible"
+              >
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   {course.name}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {course.grade}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {new Date(course.createdAt).toLocaleDateString()}
@@ -239,26 +280,32 @@ const CoursesManager: React.FC = () => {
                     onClick={() => handleEdit(course)}
                     className="text-indigo-600 hover:text-indigo-900 mr-4"
                   >
+                    <PencilIcon className="h-4 w-4 inline mr-1" />
                     Editar
                   </button>
                   <button
                     onClick={() => handleDelete(course.id)}
                     className="text-red-600 hover:text-red-900"
                   >
+                    <TrashIcon className="h-4 w-4 inline mr-1" />
                     Eliminar
                   </button>
                 </td>
-              </tr>
+              </motion.tr>
             ))}
           </tbody>
         </table>
         {courses.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-8 text-gray-500"
+          >
             No hay cursos registrados
-          </div>
+          </motion.div>
         )}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

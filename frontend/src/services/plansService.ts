@@ -3,7 +3,8 @@ import type {
   PlanGenerationFormData, 
   PlanFile,
   Subject,
-  Course 
+  Course,
+  PlanResults
 } from '../types/plans';
 
 // Datos simulados para desarrollo
@@ -164,8 +165,193 @@ class PlansService {
         files: [],
         createdAt: new Date('2024-01-20'),
         updatedAt: new Date('2024-01-20')
+      },
+      {
+        id: 'job-3',
+        teacherId,
+        subjectId: '3',
+        courseId: '4',
+        status: 'completed',
+        files: [],
+        createdAt: new Date('2024-01-10'),
+        updatedAt: new Date('2024-01-10'),
+        completedAt: new Date('2024-01-10'),
+        result: {
+          id: 'result-3',
+          planId: 'job-3',
+          summary: 'Plan de química para cuarto grado',
+          recommendations: ['Revisar tabla periódica', 'Practicar balanceo de ecuaciones'],
+          exercises: [],
+          createdAt: new Date('2024-01-10')
+        }
+      },
+      {
+        id: 'job-4',
+        teacherId,
+        subjectId: '4',
+        courseId: '5',
+        status: 'processing',
+        files: [],
+        createdAt: new Date('2024-01-22'),
+        updatedAt: new Date('2024-01-22')
+      },
+      {
+        id: 'job-5',
+        teacherId,
+        subjectId: '6',
+        courseId: '1',
+        status: 'completed',
+        files: [],
+        createdAt: new Date('2024-01-08'),
+        updatedAt: new Date('2024-01-08'),
+        completedAt: new Date('2024-01-08'),
+        result: {
+          id: 'result-5',
+          planId: 'job-5',
+          summary: 'Plan de lengua para primer grado',
+          recommendations: ['Mejorar comprensión lectora', 'Practicar ortografía'],
+          exercises: [],
+          createdAt: new Date('2024-01-08')
+        }
       }
     ];
+  }
+
+  async getPlanResults(planId: string): Promise<PlanResults> {
+    // Simular delay de red
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    return {
+      planId,
+      planName: 'Plan de Reforzamiento - Matemáticas',
+      subjectName: 'Matemáticas',
+      courseName: 'Segundo Grado',
+      totalStudents: 25,
+      completedStudents: 18,
+      averageScore: 78,
+      students: [
+        {
+          id: '1',
+          studentId: 'student-1',
+          studentName: 'Ana García',
+          planId,
+          status: 'completed',
+          score: 85,
+          completedAt: new Date('2024-01-20'),
+          planContent: `# Plan de Reforzamiento - Ana García
+
+## Resumen del Plan
+Este plan está diseñado para fortalecer los conceptos de álgebra básica y geometría.
+
+## Objetivos
+- Mejorar la comprensión de ecuaciones lineales
+- Fortalecer el cálculo de áreas y perímetros
+- Practicar resolución de problemas
+
+## Actividades Recomendadas
+1. Ejercicios de ecuaciones lineales
+2. Problemas de geometría
+3. Práctica de resolución de problemas`,
+          recommendations: [
+            'Enfócate en los conceptos de álgebra básica',
+            'Practica más ejercicios de geometría',
+            'Revisa los fundamentos de trigonometría'
+          ],
+          exercises: [
+            {
+              id: 'ex-1',
+              title: 'Ecuaciones lineales',
+              description: 'Resuelve las siguientes ecuaciones lineales',
+              difficulty: 'medium',
+              type: 'problem_solving',
+              content: '2x + 5 = 13',
+              solution: 'x = 4'
+            },
+            {
+              id: 'ex-2',
+              title: 'Área de figuras geométricas',
+              description: 'Calcula el área de las siguientes figuras',
+              difficulty: 'easy',
+              type: 'problem_solving',
+              content: 'Un rectángulo de 8cm x 6cm',
+              solution: '48 cm²'
+            }
+          ],
+          createdAt: new Date('2024-01-15'),
+          updatedAt: new Date('2024-01-20')
+        },
+        {
+          id: '2',
+          studentId: 'student-2',
+          studentName: 'Carlos Rodríguez',
+          planId,
+          status: 'in_progress',
+          score: 65,
+          completedAt: undefined,
+          planContent: `# Plan de Reforzamiento - Carlos Rodríguez
+
+## Resumen del Plan
+Plan enfocado en mejorar la comprensión de conceptos matemáticos básicos.
+
+## Objetivos
+- Reforzar operaciones básicas
+- Mejorar la resolución de problemas
+- Practicar geometría básica`,
+          recommendations: [
+            'Necesita más práctica en operaciones básicas',
+            'Enfócate en la resolución de problemas paso a paso'
+          ],
+          exercises: [
+            {
+              id: 'ex-3',
+              title: 'Operaciones básicas',
+              description: 'Realiza las siguientes operaciones',
+              difficulty: 'easy',
+              type: 'problem_solving',
+              content: '15 + 23 - 8 × 2',
+              solution: '22'
+            }
+          ],
+          createdAt: new Date('2024-01-15'),
+          updatedAt: new Date('2024-01-18')
+        },
+        {
+          id: '3',
+          studentId: 'student-3',
+          studentName: 'María López',
+          planId,
+          status: 'not_started',
+          score: undefined,
+          completedAt: undefined,
+          planContent: `# Plan de Reforzamiento - María López
+
+## Resumen del Plan
+Plan personalizado para mejorar el rendimiento en matemáticas.
+
+## Objetivos
+- Desarrollar habilidades de pensamiento lógico
+- Mejorar la comprensión de conceptos abstractos
+- Practicar resolución de problemas complejos`,
+          recommendations: [
+            'Comienza con ejercicios básicos',
+            'Practica regularmente',
+            'Busca ayuda cuando sea necesario'
+          ],
+          exercises: [],
+          createdAt: new Date('2024-01-15'),
+          updatedAt: new Date('2024-01-15')
+        }
+      ],
+      createdAt: new Date('2024-01-15')
+    };
+  }
+
+  async downloadAllPlans(planId: string): Promise<void> {
+    // Simular descarga de ZIP
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // En un caso real, aquí se generaría y descargaría el ZIP
+    console.log(`Descargando todos los planes del plan ${planId}`);
   }
 }
 

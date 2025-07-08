@@ -27,6 +27,7 @@ export interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+  isTransitioning: boolean;
 }
 
 export interface AuthContextType extends AuthState {
@@ -35,4 +36,6 @@ export interface AuthContextType extends AuthState {
   logout: () => void;
   resetPassword: (email: string) => Promise<void>;
   clearError: () => void;
-} 
+} } 
+} } 
+

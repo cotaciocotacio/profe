@@ -1,18 +1,21 @@
 import React from 'react';
+import { BeakerIcon, UserIcon, AcademicCapIcon, ClipboardDocumentListIcon, TagIcon } from '@heroicons/react/24/outline';
 
 const TestPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 py-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white shadow rounded-lg p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">
-            🧪 Página de Prueba - Credenciales de Desarrollo
+          <h1 className="text-3xl font-bold text-gray-900 mb-8 flex items-center">
+            <BeakerIcon className="h-8 w-8 mr-3 text-indigo-600" />
+            Página de Prueba - Credenciales de Desarrollo
           </h1>
           
           <div className="space-y-8">
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-              <h2 className="text-xl font-semibold text-blue-900 mb-4">
-                👨‍💼 Usuario Administrador
+              <h2 className="text-xl font-semibold text-blue-900 mb-4 flex items-center">
+                <UserIcon className="h-6 w-6 mr-2" />
+                Usuario Administrador
               </h2>
               <div className="space-y-2 text-sm">
                 <p><strong>Email:</strong> admin@escuela.edu</p>
@@ -23,8 +26,9 @@ const TestPage: React.FC = () => {
             </div>
 
             <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-              <h2 className="text-xl font-semibold text-green-900 mb-4">
-                👨‍🏫 Usuario Docente
+              <h2 className="text-xl font-semibold text-green-900 mb-4 flex items-center">
+                <AcademicCapIcon className="h-6 w-6 mr-2" />
+                Usuario Docente
               </h2>
               <div className="space-y-2 text-sm">
                 <p><strong>Email:</strong> teacher@escuela.edu</p>
@@ -35,8 +39,9 @@ const TestPage: React.FC = () => {
             </div>
 
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-              <h2 className="text-xl font-semibold text-yellow-900 mb-4">
-                📋 Instrucciones de Prueba
+              <h2 className="text-xl font-semibold text-yellow-900 mb-4 flex items-center">
+                <ClipboardDocumentListIcon className="h-6 w-6 mr-2" />
+                Instrucciones de Prueba
               </h2>
               <div className="space-y-3 text-sm">
                 <p>1. Ve a <a href="/login" className="text-blue-600 hover:underline">http://localhost:5173/login</a></p>
@@ -47,8 +52,9 @@ const TestPage: React.FC = () => {
             </div>
 
             <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
-              <h2 className="text-xl font-semibold text-purple-900 mb-4">
-                🎯 Funcionalidades Disponibles
+              <h2 className="text-xl font-semibold text-purple-900 mb-4 flex items-center">
+                <TagIcon className="h-6 w-6 mr-2" />
+                Funcionalidades Disponibles
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>

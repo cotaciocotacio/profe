@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import type { RegisterData } from '../../types/auth';
+import LoginTransition from '../common/LoginTransition';
 
 const RegisterForm: React.FC = () => {
-  const { register, isLoading, error, clearError } = useAuth();
+  const { register, isLoading, error, clearError, user, isAuthenticated, isTransitioning } = useAuth();
   const [formData, setFormData] = useState<RegisterData>({
     email: '',
     password: '',
@@ -73,27 +75,69 @@ const RegisterForm: React.FC = () => {
     }
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.6,
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: 'easeOut' as const,
+      },
+    },
+  };
+
+  // Mostrar transición de login si está en proceso
+  if (isTransitioning && user) {
+    return (
+      <LoginTransition 
+        userName={user.name} 
+        userRole={user.role} 
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="max-w-md w-full space-y-8"
+      >
+        <motion.div variants={itemVariants}>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Crear Cuenta
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Regístrate para acceder a la plataforma
           </p>
-        </div>
+        </motion.div>
         
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <motion.form variants={itemVariants} className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md"
+            >
               {error}
-            </div>
+            </motion.div>
           )}
           
           <div className="space-y-4">
-            <div>
+            <motion.div variants={itemVariants}>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                 Nombre Completo
               </label>
@@ -113,9 +157,9 @@ const RegisterForm: React.FC = () => {
               {validationErrors.name && (
                 <p className="mt-1 text-sm text-red-600">{validationErrors.name}</p>
               )}
-            </div>
+            </motion.div>
 
-            <div>
+            <motion.div variants={itemVariants}>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email
               </label>
@@ -135,9 +179,9 @@ const RegisterForm: React.FC = () => {
               {validationErrors.email && (
                 <p className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
               )}
-            </div>
+            </motion.div>
 
-            <div>
+            <motion.div variants={itemVariants}>
               <label htmlFor="role" className="block text-sm font-medium text-gray-700">
                 Rol
               </label>
@@ -151,9 +195,9 @@ const RegisterForm: React.FC = () => {
                 <option value="teacher">Docente</option>
                 <option value="admin">Administrador</option>
               </select>
-            </div>
+            </motion.div>
 
-            <div>
+            <motion.div variants={itemVariants}>
               <label htmlFor="organizationId" className="block text-sm font-medium text-gray-700">
                 ID de Organización
               </label>
@@ -172,9 +216,9 @@ const RegisterForm: React.FC = () => {
               {validationErrors.organizationId && (
                 <p className="mt-1 text-sm text-red-600">{validationErrors.organizationId}</p>
               )}
-            </div>
+            </motion.div>
 
-            <div>
+            <motion.div variants={itemVariants}>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Contraseña
               </label>
@@ -194,9 +238,9 @@ const RegisterForm: React.FC = () => {
               {validationErrors.password && (
                 <p className="mt-1 text-sm text-red-600">{validationErrors.password}</p>
               )}
-            </div>
+            </motion.div>
 
-            <div>
+            <motion.div variants={itemVariants}>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
                 Confirmar Contraseña
               </label>
@@ -216,10 +260,10 @@ const RegisterForm: React.FC = () => {
               {validationErrors.confirmPassword && (
                 <p className="mt-1 text-sm text-red-600">{validationErrors.confirmPassword}</p>
               )}
-            </div>
+            </motion.div>
           </div>
 
-          <div>
+          <motion.div variants={itemVariants}>
             <button
               type="submit"
               disabled={isLoading}
@@ -233,18 +277,18 @@ const RegisterForm: React.FC = () => {
               ) : null}
               {isLoading ? 'Creando cuenta...' : 'Crear Cuenta'}
             </button>
-          </div>
+          </motion.div>
 
-          <div className="text-center">
+          <motion.div variants={itemVariants} className="text-center">
             <p className="text-sm text-gray-600">
               ¿Ya tienes cuenta?{' '}
               <Link to="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
                 Inicia sesión aquí
               </Link>
             </p>
-          </div>
-        </form>
-      </div>
+          </motion.div>
+        </motion.form>
+      </motion.div>
     </div>
   );
 };

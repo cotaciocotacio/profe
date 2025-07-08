@@ -5,7 +5,16 @@ module.exports = {
     "./public/**/*.{js,ts,jsx,tsx,html}"
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: [
+          'Google Sans',
+          'ui-sans-serif',
+          'system-ui',
+          'sans-serif'
+        ],
+      },
+    },
   },
   plugins: [],
 }; 

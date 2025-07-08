@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import type { Subject, SubjectFormData } from '../../types/organization';
 import { organizationService } from '../../services/organizationService';
 import LoadingSpinner from '../common/LoadingSpinner';
@@ -117,6 +118,42 @@ const SubjectsManager: React.FC = () => {
     setFormData({ name: '' });
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.6,
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: 'easeOut' as const,
+      },
+    },
+  };
+
+  const tableRowVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: (i: number) => ({
+      opacity: 1,
+      x: 0,
+      transition: {
+        delay: i * 0.05,
+        duration: 0.4,
+        ease: 'easeOut' as const,
+      },
+    }),
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -126,8 +163,13 @@ const SubjectsManager: React.FC = () => {
   }
 
   return (
-    <div className="bg-white shadow rounded-lg p-6">
-      <div className="flex justify-between items-center mb-6">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="bg-white shadow rounded-lg p-6"
+    >
+      <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Gestión de Materias
@@ -142,22 +184,34 @@ const SubjectsManager: React.FC = () => {
         >
           Agregar Materia
         </button>
-      </div>
+      </motion.div>
 
       {error && (
-        <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md"
+        >
           {error}
-        </div>
+        </motion.div>
       )}
 
       {success && (
-        <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md"
+        >
           {success}
-        </div>
+        </motion.div>
       )}
 
       {showForm && (
-        <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50"
+        >
           <h3 className="text-lg font-medium text-gray-900 mb-4">
             {editingSubject ? 'Editar Materia' : 'Nueva Materia'}
           </h3>
@@ -200,10 +254,10 @@ const SubjectsManager: React.FC = () => {
               </button>
             </div>
           </form>
-        </div>
+        </motion.div>
       )}
 
-      <div className="overflow-x-auto">
+      <motion.div variants={itemVariants} className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -219,8 +273,14 @@ const SubjectsManager: React.FC = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {subjects.map((subject) => (
-              <tr key={subject.id}>
+            {subjects.map((subject, index) => (
+              <motion.tr
+                key={subject.id}
+                custom={index}
+                variants={tableRowVariants}
+                initial="hidden"
+                animate="visible"
+              >
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   {subject.name}
                 </td>
@@ -241,17 +301,21 @@ const SubjectsManager: React.FC = () => {
                     Eliminar
                   </button>
                 </td>
-              </tr>
+              </motion.tr>
             ))}
           </tbody>
         </table>
         {subjects.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-8 text-gray-500"
+          >
             No hay materias registradas
-          </div>
+          </motion.div>
         )}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

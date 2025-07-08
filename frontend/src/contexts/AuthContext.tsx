@@ -7,6 +7,7 @@ const initialState: AuthState = {
   isAuthenticated: false,
   isLoading: true,
   error: null,
+  isTransitioning: false,
 };
 
 type AuthAction =
@@ -14,38 +15,56 @@ type AuthAction =
   | { type: 'AUTH_SUCCESS'; payload: { user: any } }
   | { type: 'AUTH_FAILURE'; payload: string }
   | { type: 'AUTH_LOGOUT' }
-  | { type: 'CLEAR_ERROR' };
+  | { type: 'CLEAR_ERROR' }
+  | { type: 'START_TRANSITION' }
+  | { type: 'END_TRANSITION' };
 
 const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   switch (action.type) {
     case 'AUTH_START':
-      return { ...state, isLoading: true, error: null };
+      return {
+        ...state,
+        isLoading: true,
+        error: null,
+      };
     case 'AUTH_SUCCESS':
       return {
         ...state,
-        user: action.payload.user,
-        isAuthenticated: true,
         isLoading: false,
+        isAuthenticated: true,
+        user: action.payload.user,
         error: null,
       };
     case 'AUTH_FAILURE':
       return {
         ...state,
-        user: null,
-        isAuthenticated: false,
         isLoading: false,
+        isAuthenticated: false,
         error: action.payload,
       };
     case 'AUTH_LOGOUT':
       return {
         ...state,
-        user: null,
-        isAuthenticated: false,
         isLoading: false,
+        isAuthenticated: false,
+        user: null,
         error: null,
       };
     case 'CLEAR_ERROR':
-      return { ...state, error: null };
+      return {
+        ...state,
+        error: null,
+      };
+    case 'START_TRANSITION':
+      return {
+        ...state,
+        isTransitioning: true,
+      };
+    case 'END_TRANSITION':
+      return {
+        ...state,
+        isTransitioning: false,
+      };
     default:
       return state;
   }
@@ -83,7 +102,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       const { user, token } = await authService.login(credentials);
       localStorage.setItem('token', token);
-      dispatch({ type: 'AUTH_SUCCESS', payload: { user } });
+      
+      // Iniciar transición suave
+      dispatch({ type: 'START_TRANSITION' });
+      
+      // Simular delay para la animación
+      setTimeout(() => {
+        dispatch({ type: 'AUTH_SUCCESS', payload: { user } });
+        dispatch({ type: 'END_TRANSITION' });
+      }, 800);
     } catch (error) {
       dispatch({ type: 'AUTH_FAILURE', payload: (error as Error).message });
     }
@@ -95,7 +122,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       const { user, token } = await authService.register(data);
       localStorage.setItem('token', token);
-      dispatch({ type: 'AUTH_SUCCESS', payload: { user } });
+      
+      // Iniciar transición suave
+      dispatch({ type: 'START_TRANSITION' });
+      
+      // Simular delay para la animación
+      setTimeout(() => {
+        dispatch({ type: 'AUTH_SUCCESS', payload: { user } });
+        dispatch({ type: 'END_TRANSITION' });
+      }, 800);
     } catch (error) {
       dispatch({ type: 'AUTH_FAILURE', payload: (error as Error).message });
     }
@@ -108,10 +143,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const resetPassword = async (email: string) => {
     try {
-      // Simular reset de contraseña
-      console.log('Reset password for:', email);
+      await authService.resetPassword(email);
     } catch (error) {
-      dispatch({ type: 'AUTH_FAILURE', payload: (error as Error).message });
+      throw error;
     }
   };
 
@@ -134,7 +168,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth debe ser usado dentro de un AuthProvider');
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 }; 

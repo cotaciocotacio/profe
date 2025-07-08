@@ -8,6 +8,7 @@ import TestPage from './pages/TestPage';
 import AdminDashboard from './pages/AdminDashboard';
 import TeacherDashboard from './pages/TeacherDashboard';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import LandingPage from './pages/LandingPage';
 
 const App: React.FC = () => {
   return (
@@ -15,6 +16,9 @@ const App: React.FC = () => {
       <Router>
         <div className="App">
           <Routes>
+            {/* Landing page */}
+            <Route path="/" element={<LandingPage />} />
+
             {/* Rutas de autenticación */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
@@ -42,11 +46,8 @@ const App: React.FC = () => {
             {/* Ruta de prueba */}
             <Route path="/test" element={<TestPage />} />
             
-            {/* Ruta por defecto - redirige según el rol */}
-            <Route path="/" element={<Navigate to="/login" replace />} />
-            
-            {/* Ruta para cualquier otra URL - redirige a login */}
-            <Route path="*" element={<Navigate to="/login" replace />} />
+            {/* Ruta para cualquier otra URL - redirige a landing */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
       </Router>
@@ -55,3 +56,6 @@ const App: React.FC = () => {
 };
 
 export default App;
+
+
+
