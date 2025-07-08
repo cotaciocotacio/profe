@@ -37,7 +37,7 @@ const SubjectsManager: React.FC = () => {
   const [formData, setFormData] = useState<SubjectFormData>({ name: '' });
 
   useEffect(() => {
-    // loadSubjects(); // Comentado para desarrollo
+    loadSubjects();
   }, []);
 
   const loadSubjects = async () => {

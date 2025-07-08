@@ -6,7 +6,7 @@ import type { RegisterData } from '../../types/auth';
 import LoginTransition from '../common/LoginTransition';
 
 const RegisterForm: React.FC = () => {
-  const { register, isLoading, error, clearError, user, isAuthenticated, isTransitioning } = useAuth();
+  const { register, isLoading, error, clearError, user, isTransitioning } = useAuth();
   const [formData, setFormData] = useState<RegisterData>({
     email: '',
     password: '',
