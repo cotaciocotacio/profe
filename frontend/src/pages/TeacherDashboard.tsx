@@ -6,6 +6,7 @@ import PlanGenerationWizard from '../components/teacher/PlanGenerationWizard';
 import PlanResultsPage from '../components/teacher/PlanResultsPage';
 import { PlusIcon, ClipboardDocumentListIcon, CheckCircleIcon, ClockIcon, XCircleIcon, PauseIcon } from '@heroicons/react/24/outline';
 import DashboardLayout from '../components/layouts/DashboardLayout';
+import ChatWidget from '../components/chat/ChatWidget';
 
 type TeacherSection = 'create-plan' | 'results';
 
@@ -14,6 +15,7 @@ const TeacherDashboard: React.FC = () => {
   const [jobs, setJobs] = useState<PlanGenerationJob[]>([]);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [previousSection, setPreviousSection] = useState<TeacherSection>('create-plan');
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   // Helper functions to map IDs to readable names
   const getSubjectName = (subjectId: string): string => {
@@ -154,13 +156,6 @@ const TeacherDashboard: React.FC = () => {
     transition: { duration: 0.3 }
   };
 
-  const fadeIn = {
-    initial: { opacity: 0 },
-    animate: { opacity: 1 },
-    exit: { opacity: 0 },
-    transition: { duration: 0.2 }
-  };
-
   const renderSection = () => {
     console.log('Rendering section:', activeSection);
     console.log('Jobs state:', jobs);
@@ -193,7 +188,7 @@ const TeacherDashboard: React.FC = () => {
             transition={{ duration: 0.3 }}
           >
             <PlanGenerationWizard
-              onComplete={(jobId) => {
+              onComplete={() => {
                 setActiveSection('results');
                 loadJobs();
               }}
@@ -381,6 +376,15 @@ const TeacherDashboard: React.FC = () => {
           {renderSection()}
         </AnimatePresence>
       </DashboardLayout>
+      
+      {/* Chat Widget */}
+      <ChatWidget
+        isOpen={isChatOpen}
+        onToggle={() => setIsChatOpen(!isChatOpen)}
+        position="bottom-right"
+        theme="light"
+        maxHeight="500px"
+      />
     </motion.div>
   );
 };
