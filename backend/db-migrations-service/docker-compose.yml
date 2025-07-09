@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  db-migrations-service:
+    build: .
+    ports:
+      - "3009:3009"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/profe_migrations
+      - REDIS_URL=redis://redis:6379
+      - BACKUP_STORAGE=s3://profe-backups/
+      - LOG_LEVEL=info
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./migrations:/app/migrations
+      - ./seeds:/app/seeds
+      - ./backups:/app/backups
+    networks:
+      - profe-network
+
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=profe_migrations
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5437:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - profe-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - profe-network
+
+  # Services databases for development
+  auth-db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=auth_service
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5438:5432"
+    volumes:
+      - auth_data:/var/lib/postgresql/data
+    networks:
+      - profe-network
+
+  plans-db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=plans_service
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5439:5432"
+    volumes:
+      - plans_data:/var/lib/postgresql/data
+    networks:
+      - profe-network
+
+  chat-db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=chat_service
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5440:5432"
+    volumes:
+      - chat_data:/var/lib/postgresql/data
+    networks:
+      - profe-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  auth_data:
+  plans_data:
+  chat_data:
+
+networks:
+  profe-network:
+    driver: bridge 
